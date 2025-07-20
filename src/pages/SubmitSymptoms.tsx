@@ -34,55 +34,8 @@ export default function SubmitSymptoms() {
     return "";
   };
 
-  // GPS Location Service - Maps coordinates to districts/divisional secretariats
-  const getLocationFromCoordinates = (latitude: number, longitude: number): { district: string; divisionalSecretariat: string } => {
-    // Sri Lanka coordinate bounds and district mapping
-    // This is a simplified mapping - in a real application, you'd use a proper geocoding service
-    const locationMappings = [
-      { bounds: { minLat: 6.7, maxLat: 7.0, minLng: 79.8, maxLng: 80.2 }, district: "Colombo", divisionalSecretariat: "Colombo" },
-      { bounds: { minLat: 6.9, maxLat: 7.2, minLng: 79.9, maxLng: 80.3 }, district: "Gampaha", divisionalSecretariat: "Gampaha" },
-      { bounds: { minLat: 6.5, maxLat: 6.8, minLng: 79.8, maxLng: 80.2 }, district: "Kalutara", divisionalSecretariat: "Kalutara" },
-      { bounds: { minLat: 7.2, maxLat: 7.4, minLng: 80.5, maxLng: 80.8 }, district: "Kandy", divisionalSecretariat: "Kandy" },
-      { bounds: { minLat: 7.4, maxLat: 7.6, minLng: 80.5, maxLng: 80.8 }, district: "Matale", divisionalSecretariat: "Matale" },
-      { bounds: { minLat: 6.9, maxLat: 7.1, minLng: 80.7, maxLng: 81.0 }, district: "Nuwara Eliya", divisionalSecretariat: "Nuwara Eliya" },
-      { bounds: { minLat: 6.0, maxLat: 6.3, minLng: 80.1, maxLng: 80.4 }, district: "Galle", divisionalSecretariat: "Galle" },
-      { bounds: { minLat: 5.9, maxLat: 6.2, minLng: 80.5, maxLng: 80.8 }, district: "Matara", divisionalSecretariat: "Matara" },
-      { bounds: { minLat: 6.1, maxLat: 6.4, minLng: 81.0, maxLng: 81.3 }, district: "Hambantota", divisionalSecretariat: "Hambantota" },
-      { bounds: { minLat: 9.5, maxLat: 9.8, minLng: 80.0, maxLng: 80.3 }, district: "Jaffna", divisionalSecretariat: "Jaffna" },
-      { bounds: { minLat: 9.3, maxLat: 9.6, minLng: 80.3, maxLng: 80.6 }, district: "Kilinochchi", divisionalSecretariat: "Kilinochchi" },
-      { bounds: { minLat: 8.9, maxLat: 9.2, minLng: 79.9, maxLng: 80.2 }, district: "Mannar", divisionalSecretariat: "Mannar" },
-      { bounds: { minLat: 8.7, maxLat: 9.0, minLng: 80.4, maxLng: 80.7 }, district: "Vavuniya", divisionalSecretariat: "Vavuniya" },
-      { bounds: { minLat: 9.0, maxLat: 9.3, minLng: 80.7, maxLng: 81.0 }, district: "Mullaitivu", divisionalSecretariat: "Mullaitivu" },
-      { bounds: { minLat: 7.7, maxLat: 8.0, minLng: 81.6, maxLng: 81.9 }, district: "Batticaloa", divisionalSecretariat: "Batticaloa" },
-      { bounds: { minLat: 7.2, maxLat: 7.5, minLng: 81.6, maxLng: 81.9 }, district: "Ampara", divisionalSecretariat: "Ampara" },
-      { bounds: { minLat: 8.5, maxLat: 8.8, minLng: 81.1, maxLng: 81.4 }, district: "Trincomalee", divisionalSecretariat: "Trincomalee" },
-      { bounds: { minLat: 7.4, maxLat: 7.7, minLng: 80.3, maxLng: 80.6 }, district: "Kurunegala", divisionalSecretariat: "Kurunegala" },
-      { bounds: { minLat: 8.0, maxLat: 8.3, minLng: 79.8, maxLng: 80.1 }, district: "Puttalam", divisionalSecretariat: "Puttalam" },
-      { bounds: { minLat: 8.3, maxLat: 8.6, minLng: 80.3, maxLng: 80.6 }, district: "Anuradhapura", divisionalSecretariat: "Anuradhapura East" },
-      { bounds: { minLat: 7.9, maxLat: 8.2, minLng: 80.9, maxLng: 81.2 }, district: "Polonnaruwa", divisionalSecretariat: "Polonnaruwa" },
-      { bounds: { minLat: 6.9, maxLat: 7.2, minLng: 81.0, maxLng: 81.3 }, district: "Badulla", divisionalSecretariat: "Badulla" },
-      { bounds: { minLat: 6.8, maxLat: 7.1, minLng: 81.3, maxLng: 81.6 }, district: "Monaragala", divisionalSecretariat: "Monaragala" },
-      { bounds: { minLat: 6.6, maxLat: 6.9, minLng: 80.3, maxLng: 80.6 }, district: "Ratnapura", divisionalSecretariat: "Ratnapura" },
-      { bounds: { minLat: 7.2, maxLat: 7.5, minLng: 80.3, maxLng: 80.6 }, district: "Kegalle", divisionalSecretariat: "Kegalle" }
-    ];
-
-    for (const mapping of locationMappings) {
-      const { bounds, district, divisionalSecretariat } = mapping;
-      if (
-        latitude >= bounds.minLat &&
-        latitude <= bounds.maxLat &&
-        longitude >= bounds.minLng &&
-        longitude <= bounds.maxLng
-      ) {
-        return { district, divisionalSecretariat };
-      }
-    }
-
-    // Default fallback if no mapping found
-    return { district: "Colombo", divisionalSecretariat: "Colombo" };
-  };
-
-  const getCurrentLocation = () => {
+  // GPS Location Detection using OpenStreet API
+  const handleGetCurrentLocation = async () => {
     setIsLoadingLocation(true);
     setLocationError("");
 
@@ -93,37 +46,141 @@ export default function SubmitSymptoms() {
     }
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const { latitude, longitude } = position.coords;
-        const location = getLocationFromCoordinates(latitude, longitude);
-        
-        setSelectedDistrict(location.district);
-        setSelectedDivisionalSecretariat(location.divisionalSecretariat);
-        setIsLocationAutoDetected(true);
-        setIsLoadingLocation(false);
         setLatitude(latitude);
         setLongitude(longitude);
-       },
-      (error) => {
-        let errorMessage = "Unable to retrieve location";
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage = "Location access denied by user";
-            break;
-          case error.POSITION_UNAVAILABLE:
-            errorMessage = "Location information unavailable";
-            break;
-          case error.TIMEOUT:
-            errorMessage = "Location request timed out";
-            break;
+
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
+          );
+          const data = await response.json();
+          console.log("Reverse geocode data:", data);
+          console.log("Address details:", data.address);
+
+          let detectedDistrict =
+            data.address.county || data.address.state_district || data.address.district || "";
+
+          if (detectedDistrict.toLowerCase().endsWith(" district")) {
+            detectedDistrict = detectedDistrict.slice(0, -9).trim();
+          }
+
+          console.log("Detected district:", detectedDistrict);
+
+          // Try multiple address fields for divisional secretariat detection
+          const detectedDS = 
+            data.address.suburb || 
+            data.address.village || 
+            data.address.town || 
+            data.address.hamlet || 
+            data.address.neighbourhood ||
+            data.address.city_district ||
+            data.address.municipality || "";
+
+          console.log("Detected DS:", detectedDS);
+          console.log("Available address fields:", {
+            suburb: data.address.suburb,
+            village: data.address.village,
+            town: data.address.town,
+            hamlet: data.address.hamlet,
+            neighbourhood: data.address.neighbourhood,
+            city_district: data.address.city_district,
+            municipality: data.address.municipality
+          });
+
+          const districts = Object.keys(districtDivisionalSecretariats);
+          const matchedDistrict = districts.find(
+            (d) => d.toLowerCase() === detectedDistrict.toLowerCase()
+          );
+
+          if (matchedDistrict) {
+            const dsList = districtDivisionalSecretariats[matchedDistrict] || [];
+            console.log(`Available DS divisions for ${matchedDistrict}:`, dsList);
+            
+            // Try exact match first
+            let matchedDS = dsList.find(
+              (ds) => ds.toLowerCase() === detectedDS.toLowerCase()
+            );
+
+            console.log("Exact match result:", matchedDS);
+
+            // If no exact match, try partial matching
+            if (!matchedDS && detectedDS) {
+              matchedDS = dsList.find(
+                (ds) => ds.toLowerCase().includes(detectedDS.toLowerCase()) ||
+                       detectedDS.toLowerCase().includes(ds.toLowerCase())
+              );
+              console.log("Partial match result:", matchedDS);
+            }
+
+            // If still no match, try matching with any part of the address
+            if (!matchedDS) {
+              const allAddressParts = [
+                data.address.suburb,
+                data.address.village,
+                data.address.town,
+                data.address.hamlet,
+                data.address.neighbourhood,
+                data.address.city_district,
+                data.address.municipality,
+                data.address.postcode
+              ].filter(Boolean);
+
+              console.log("Trying address parts:", allAddressParts);
+
+              for (const addressPart of allAddressParts) {
+                matchedDS = dsList.find(
+                  (ds) => ds.toLowerCase().includes(addressPart.toLowerCase()) ||
+                         addressPart.toLowerCase().includes(ds.toLowerCase())
+                );
+                if (matchedDS) {
+                  console.log(`Found DS match with address part "${addressPart}":`, matchedDS);
+                  break;
+                }
+              }
+            }
+
+            // Set the results
+            setSelectedDistrict(matchedDistrict);
+            if (matchedDS) {
+              setSelectedDivisionalSecretariat(matchedDS);
+              setIsLocationAutoDetected(true);
+              setIsLoadingLocation(false);
+              
+              // Show success message for DS detection
+              setLocationError(
+                `DS detected: ${matchedDS}. Please verify if correct.`
+              );
+            } else {
+              // If no DS match found, still set district but select first DS as fallback
+              setSelectedDivisionalSecretariat(dsList[0] || "");
+              setIsLocationAutoDetected(true);
+              setIsLoadingLocation(false);
+              
+              // Show a warning that DS was auto-selected
+              if (dsList[0]) {
+                setLocationError(
+                  `District detected: ${matchedDistrict}. Please verify if correct.`
+                );
+              }
+            }
+          } else {
+            setLocationError(
+              `Detected district '${detectedDistrict}' not found in options. Please select manually.`
+            );
+            setIsLoadingLocation(false);
+          }
+        } catch (error) {
+          setLocationError("Failed to detect district and divisional secretariat from location.");
+          console.error(error);
+          setIsLoadingLocation(false);
         }
-        setLocationError(errorMessage);
-        setIsLoadingLocation(false);
       },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 600000 // 10 minutes
+      (error) => {
+        setLocationError("Unable to retrieve your location");
+        console.error(error);
+        setIsLoadingLocation(false);
       }
     );
   };
@@ -339,7 +396,7 @@ export default function SubmitSymptoms() {
                   </select>
                   <button
                     type="button"
-                    onClick={getCurrentLocation}
+                    onClick={handleGetCurrentLocation}
                     disabled={isLoadingLocation}
                     className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-150 flex items-center gap-2 ${
                       isLoadingLocation
@@ -364,7 +421,15 @@ export default function SubmitSymptoms() {
                   </button>
                 </div>
                 {locationError && (
-                  <p className="text-red-500 text-sm mt-1">{locationError}</p>
+                  <p className={`text-sm mt-1 flex items-center gap-1 ${
+                    locationError.includes("detected:") ? "text-green-600" : "text-red-500"
+                  }`}>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    {locationError}
+                  </p>
                 )}
               </div>
             </div>
@@ -398,7 +463,7 @@ export default function SubmitSymptoms() {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                        Location auto-detected: {district}, {divisional_secretariat}
+                        DS detected: {divisional_secretariat}. Please verify if correct.
                       </p>
                     ) : (
                       <p className="text-blue-600 text-sm flex items-center gap-1">
@@ -406,11 +471,6 @@ export default function SubmitSymptoms() {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
                         Location manually selected: {district}, {divisional_secretariat}
-                      </p>
-                    )}
-                    {isLocationAutoDetected && (
-                      <p className="text-gray-500 text-xs mt-1 ml-5">
-                        You can change the selections above if the auto-detected location is incorrect.
                       </p>
                     )}
                   </div>

@@ -122,6 +122,8 @@ type Alert = {
   alert_type: string;
   severity: string;
   date_time: string;
+  reporter_name?: string;
+  reporter_contact?: string;
   resolved?: boolean;
 };
 
@@ -178,6 +180,9 @@ export default function OngoingAlerts() {
 
       if (!res.ok) throw new Error("Failed to update alert");
 
+      // Show success message
+      alert("Alert is resolved");
+
       // Remove resolved alert from list
       setAlerts((prev) => prev.filter((_, i) => i !== idx));
     } catch (err) {
@@ -207,6 +212,8 @@ export default function OngoingAlerts() {
                 <th className="py-2 px-4 text-left">Alert Type</th>
                 <th className="py-2 px-4 text-left">Severity</th>
                 <th className="py-2 px-4 text-left">Date</th>
+                <th className="py-2 px-4 text-left">Reporter Name</th>
+                <th className="py-2 px-4 text-left">Reporter Contact Number</th>
                 <th className="py-2 px-4 text-left">Mark as Resolved</th>
               </tr>
             </thead>
@@ -219,6 +226,8 @@ export default function OngoingAlerts() {
                   <td className="py-2 px-4">
                     {new Date(alert.date_time).toLocaleDateString()}
                   </td>
+                  <td className="py-2 px-4">{alert.reporter_name || 'N/A'}</td>
+                  <td className="py-2 px-4">{alert.reporter_contact || 'N/A'}</td>
                   <td className="py-2 px-4">
                     <input
                       type="checkbox"

@@ -16,7 +16,6 @@ import AddContribution from "./pages/volunteer/AddContribution";
 import SystemSettings from "./pages/volunteer/SystemSettings";
 import DSDashboardLayout from "./pages/DS/DSDashboardLayout";
 import DSDashboardHome from "./pages/DS/DSDashboardHome";
-import ReviewSymptomReports from "./pages/DS/ReviewSymptomReports";
 import SubmitManualReport from "./pages/DS/SubmitManualReport";
 import ResolvedAlerts from "./pages/DS/ResolvedAlerts";
 import ApproveAidRequests from "./pages/DS/ApproveAidRequests";
@@ -59,7 +58,6 @@ function AppContent() {
         {/* General DS dashboard routes */}
         <Route path="/ds-dashboard" element={<DSDashboardLayout />}>
           <Route index element={<DSDashboardHome />} />
-          <Route path="review-reports" element={<ReviewSymptomReports />} />
           <Route path="submit-manual-reports" element={<SubmitManualReport />} />
           <Route path="resolved-alerts" element={<ResolvedAlerts />} />
           <Route path="approve-aid-requests" element={<ApproveAidRequests />} />
