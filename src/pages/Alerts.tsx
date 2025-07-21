@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import districtGnDivisions from "../data/districtDivisionalSecretariats";
 
@@ -23,7 +22,7 @@ export default function Alerts() {
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
   const [selectedGnDivision, setSelectedGnDivision] = useState<string | null>(null);
   const [selectedSeverity, setSelectedSeverity] = useState<string | null>(null);
-  const [selectedStatus, setSelectedStatus] = useState<string | null>("Ongoing"); // default
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
 
   const districts = Object.keys(districtGnDivisions);
   const gnDivisions = selectedDistrict ? districtGnDivisions[selectedDistrict] : [];
@@ -42,12 +41,33 @@ export default function Alerts() {
     fetchAlerts();
   }, []);
 
+  const handleResetFilters = () => {
+    setSelectedType(null);
+    setSelectedDistrict(null);
+    setSelectedGnDivision(null);
+    setSelectedSeverity(null);
+    setSelectedStatus(null);
+    localStorage.removeItem("selectedDistrict");
+  };
+
+  const handleDistrictChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newDistrict = e.target.value || null;
+    setSelectedDistrict(newDistrict);
+    setSelectedGnDivision(null);
+
+    if (newDistrict) {
+      localStorage.setItem("selectedDistrict", newDistrict);
+    } else {
+      localStorage.removeItem("selectedDistrict");
+    }
+  };
+
   const filteredDisasters = disasters.filter(d =>
     (!selectedType || d.type === selectedType) &&
     (!selectedDistrict || d.district === selectedDistrict) &&
     (!selectedGnDivision || d.gnDivision === selectedGnDivision) &&
-    (!selectedSeverity || d.severity === selectedSeverity) &&
-    (!selectedStatus || d.status === selectedStatus)
+    (!selectedSeverity || d.severity === selectedSeverity) 
+    
   );
 
   return (
@@ -56,6 +76,7 @@ export default function Alerts() {
         {/* Filters */}
         <div className="mb-6 bg-blue-50 rounded-xl p-4 flex flex-wrap items-center gap-4">
           <span className="font-semibold text-gray-700">Filter by:</span>
+
           <select
             className="px-3 py-2 rounded-lg border border-gray-300 focus:outline-none"
             value={selectedType || ""}
@@ -70,10 +91,7 @@ export default function Alerts() {
           <select
             className="px-3 py-2 rounded-lg border border-gray-300 focus:outline-none"
             value={selectedDistrict || ""}
-            onChange={e => {
-              setSelectedDistrict(e.target.value || null);
-              setSelectedGnDivision(null);
-            }}
+            onChange={handleDistrictChange}
           >
             <option value="">District</option>
             {districts.map(d => (
@@ -104,16 +122,14 @@ export default function Alerts() {
             ))}
           </select>
 
-          <select
-            className="px-3 py-2 rounded-lg border border-gray-300 focus:outline-none"
-            value={selectedStatus || ""}
-            onChange={e => setSelectedStatus(e.target.value || null)}
+          
+
+          <button
+            className="px-4 py-2 bg-gray-200 rounded-lg font-semibold hover:bg-gray-300"
+            onClick={handleResetFilters}
           >
-            <option value="">Status</option>
-            {statusTypes.map(stat => (
-              <option key={stat} value={stat}>{stat}</option>
-            ))}
-          </select>
+            Reset Filters
+          </button>
         </div>
 
         {/* Table */}
@@ -132,47 +148,48 @@ export default function Alerts() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-100">
-              {filteredDisasters.length === 0 && (
+              {filteredDisasters.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-6 py-8 text-center text-gray-400">
                     No alerts found for selected filters.
                   </td>
                 </tr>
+              ) : (
+                filteredDisasters.map((disaster, idx) => (
+                  <tr key={disaster.id}>
+                    <td className="px-6 py-4">{idx + 1}</td>
+                    <td className="px-6 py-4 font-semibold text-blue-700">{disaster.type}</td>
+                    <td className="px-6 py-4">{disaster.district}</td>
+                    <td className="px-6 py-4">{disaster.gnDivision}</td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
+                          disaster.severity === "High"
+                            ? "bg-red-500 text-white"
+                            : disaster.severity === "Medium"
+                            ? "bg-yellow-400 text-white"
+                            : "bg-green-500 text-white"
+                        }`}
+                      >
+                        {disaster.severity}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
+                          disaster.status === "Ongoing"
+                            ? "bg-red-100 text-red-700"
+                            : "bg-green-100 text-green-700"
+                        }`}
+                      >
+                        {disaster.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">{disaster.date}</td>
+                    <td className="px-6 py-4">{disaster.time}</td>
+                  </tr>
+                ))
               )}
-              {filteredDisasters.map((disaster, idx) => (
-                <tr key={disaster.id}>
-                  <td className="px-6 py-4">{idx + 1}</td>
-                  <td className="px-6 py-4 font-semibold text-blue-700">{disaster.type}</td>
-                  <td className="px-6 py-4">{disaster.district}</td>
-                  <td className="px-6 py-4">{disaster.gnDivision}</td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
-                        disaster.severity === "High"
-                          ? "bg-red-500 text-white"
-                          : disaster.severity === "Medium"
-                          ? "bg-yellow-400 text-white"
-                          : "bg-green-500 text-white"
-                      }`}
-                    >
-                      {disaster.severity}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
-                        disaster.status === "Ongoing"
-                          ? "bg-red-100 text-red-700"
-                          : "bg-green-100 text-green-700"
-                      }`}
-                    >
-                      {disaster.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">{disaster.date}</td>
-                  <td className="px-6 py-4">{disaster.time}</td>
-                </tr>
-              ))}
             </tbody>
           </table>
         </div>

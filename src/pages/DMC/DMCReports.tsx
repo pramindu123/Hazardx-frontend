@@ -13,6 +13,7 @@ export default function DMCReports() {
     severity: "Medium",
     latitude: 0,
     longitude: 0,
+    reporterContact: "",
   });
 
   useEffect(() => {
@@ -54,6 +55,8 @@ export default function DMCReports() {
       setReports([]);
     }
   };
+
+  
 
   // AI Image Verification Function
   const verifyImageAuthenticity = async (imageUrl: string, description: string, reportId: string) => {
@@ -108,6 +111,7 @@ export default function DMCReports() {
       severity: "Medium",
       latitude: report.latitude,
       longitude: report.longitude,
+      reporterContact: report.contact_no || "",
     });
     setShowAlertModal(true);
   };
@@ -129,6 +133,7 @@ export default function DMCReports() {
       severity: "Medium",
       latitude: 0,
       longitude: 0,
+      reporterContact: "",
     });
     setSelected(null);
   };
@@ -143,6 +148,7 @@ export default function DMCReports() {
       severity: alertForm.severity,
       latitude: alertForm.latitude,
       longitude: alertForm.longitude,
+      reporter_contact: alertForm.reporterContact,
     };
 
     try {

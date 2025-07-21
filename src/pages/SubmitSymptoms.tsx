@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import districtDivisionalSecretariats from "../data/districtDivisionalSecretariats";
 
 export default function SubmitSymptoms() {
@@ -6,8 +6,10 @@ export default function SubmitSymptoms() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [fileName, setFileName] = useState<string>("");
-  const [image, setFileUrl] = useState<string>("");
+  const [image, setImage] = useState<string>(""); // ✅ Base64 string
+  const [previewUrl, setPreviewUrl] = useState<string>("");
   const [showSuccess, setShowSuccess] = useState(false);
+
   const [reporter_name, setFullName] = useState("");
   const [contact_no, setContactNo] = useState("");
   const [district, setSelectedDistrict] = useState<string>("");
@@ -24,195 +26,126 @@ export default function SubmitSymptoms() {
     reporter_name: "",
     contact_no: "",
     description: ""
-     });
+  });
 
   const validatePhoneNumber = (phone: string) => {
     const regex = /^\d{10}$/;
-    if (!regex.test(phone)) {
-      return "Phone number must be exactly 10 digits";
-    }
-    return "";
+    return !regex.test(phone) ? "Phone number must be exactly 10 digits" : "";
   };
 
-  // GPS Location Detection using OpenStreet API
-  const handleGetCurrentLocation = async () => {
+  const getLocationFromCoordinates = (latitude: number, longitude: number) => {
+    const locationMappings = [
+      { bounds: { minLat: 6.7, maxLat: 7.0, minLng: 79.8, maxLng: 80.2 }, district: "Colombo", divisionalSecretariat: "Colombo" },
+      { bounds: { minLat: 6.9, maxLat: 7.2, minLng: 79.9, maxLng: 80.3 }, district: "Gampaha", divisionalSecretariat: "Gampaha" },
+      { bounds: { minLat: 6.5, maxLat: 6.8, minLng: 79.8, maxLng: 80.2 }, district: "Kalutara", divisionalSecretariat: "Kalutara" },
+      { bounds: { minLat: 7.2, maxLat: 7.4, minLng: 80.5, maxLng: 80.8 }, district: "Kandy", divisionalSecretariat: "Kandy" },
+      { bounds: { minLat: 7.4, maxLat: 7.6, minLng: 80.5, maxLng: 80.8 }, district: "Matale", divisionalSecretariat: "Matale" },
+      { bounds: { minLat: 6.9, maxLat: 7.1, minLng: 80.7, maxLng: 81.0 }, district: "Nuwara Eliya", divisionalSecretariat: "Nuwara Eliya" },
+      { bounds: { minLat: 6.0, maxLat: 6.3, minLng: 80.1, maxLng: 80.4 }, district: "Galle", divisionalSecretariat: "Galle" },
+      { bounds: { minLat: 5.9, maxLat: 6.2, minLng: 80.5, maxLng: 80.8 }, district: "Matara", divisionalSecretariat: "Matara" },
+      { bounds: { minLat: 6.1, maxLat: 6.4, minLng: 81.0, maxLng: 81.3 }, district: "Hambantota", divisionalSecretariat: "Hambantota" },
+      { bounds: { minLat: 9.5, maxLat: 9.8, minLng: 80.0, maxLng: 80.3 }, district: "Jaffna", divisionalSecretariat: "Jaffna" },
+      { bounds: { minLat: 9.3, maxLat: 9.6, minLng: 80.3, maxLng: 80.6 }, district: "Kilinochchi", divisionalSecretariat: "Kilinochchi" },
+      { bounds: { minLat: 8.9, maxLat: 9.2, minLng: 79.9, maxLng: 80.2 }, district: "Mannar", divisionalSecretariat: "Mannar" },
+      { bounds: { minLat: 8.7, maxLat: 9.0, minLng: 80.4, maxLng: 80.7 }, district: "Vavuniya", divisionalSecretariat: "Vavuniya" },
+      { bounds: { minLat: 9.0, maxLat: 9.3, minLng: 80.7, maxLng: 81.0 }, district: "Mullaitivu", divisionalSecretariat: "Mullaitivu" },
+      { bounds: { minLat: 7.7, maxLat: 8.0, minLng: 81.6, maxLng: 81.9 }, district: "Batticaloa", divisionalSecretariat: "Batticaloa" },
+      { bounds: { minLat: 7.2, maxLat: 7.5, minLng: 81.6, maxLng: 81.9 }, district: "Ampara", divisionalSecretariat: "Ampara" },
+      { bounds: { minLat: 8.5, maxLat: 8.8, minLng: 81.1, maxLng: 81.4 }, district: "Trincomalee", divisionalSecretariat: "Trincomalee" },
+      { bounds: { minLat: 7.4, maxLat: 7.7, minLng: 80.3, maxLng: 80.6 }, district: "Kurunegala", divisionalSecretariat: "Kurunegala" },
+      { bounds: { minLat: 8.0, maxLat: 8.3, minLng: 79.8, maxLng: 80.1 }, district: "Puttalam", divisionalSecretariat: "Puttalam" },
+      { bounds: { minLat: 8.3, maxLat: 8.6, minLng: 80.3, maxLng: 80.6 }, district: "Anuradhapura", divisionalSecretariat: "Anuradhapura East" },
+      { bounds: { minLat: 7.9, maxLat: 8.2, minLng: 80.9, maxLng: 81.2 }, district: "Polonnaruwa", divisionalSecretariat: "Polonnaruwa" },
+      { bounds: { minLat: 6.9, maxLat: 7.2, minLng: 81.0, maxLng: 81.3 }, district: "Badulla", divisionalSecretariat: "Badulla" },
+      { bounds: { minLat: 6.8, maxLat: 7.1, minLng: 81.3, maxLng: 81.6 }, district: "Monaragala", divisionalSecretariat: "Monaragala" },
+      { bounds: { minLat: 6.6, maxLat: 6.9, minLng: 80.3, maxLng: 80.6 }, district: "Ratnapura", divisionalSecretariat: "Ratnapura" },
+      { bounds: { minLat: 7.2, maxLat: 7.5, minLng: 80.3, maxLng: 80.6 }, district: "Kegalle", divisionalSecretariat: "Kegalle" }
+    ];
+    for (const mapping of locationMappings) {
+      const { bounds, district, divisionalSecretariat } = mapping;
+      if (
+        latitude >= bounds.minLat && latitude <= bounds.maxLat &&
+        longitude >= bounds.minLng && longitude <= bounds.maxLng
+      ) {
+        return { district, divisionalSecretariat };
+      }
+    }
+    return { district: "Colombo", divisionalSecretariat: "Colombo" };
+  };
+
+  const getCurrentLocation = () => {
     setIsLoadingLocation(true);
     setLocationError("");
 
     if (!navigator.geolocation) {
-      setLocationError("Geolocation is not supported by this browser");
+      setLocationError("Geolocation not supported");
       setIsLoadingLocation(false);
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
+      (position) => {
         const { latitude, longitude } = position.coords;
+        const loc = getLocationFromCoordinates(latitude, longitude);
+        setSelectedDistrict(loc.district);
+        setSelectedDivisionalSecretariat(loc.divisionalSecretariat);
+        setIsLocationAutoDetected(true);
         setLatitude(latitude);
         setLongitude(longitude);
-
-        try {
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
-          );
-          const data = await response.json();
-          console.log("Reverse geocode data:", data);
-          console.log("Address details:", data.address);
-
-          let detectedDistrict =
-            data.address.county || data.address.state_district || data.address.district || "";
-
-          if (detectedDistrict.toLowerCase().endsWith(" district")) {
-            detectedDistrict = detectedDistrict.slice(0, -9).trim();
-          }
-
-          console.log("Detected district:", detectedDistrict);
-
-          // Try multiple address fields for divisional secretariat detection
-          const detectedDS = 
-            data.address.suburb || 
-            data.address.village || 
-            data.address.town || 
-            data.address.hamlet || 
-            data.address.neighbourhood ||
-            data.address.city_district ||
-            data.address.municipality || "";
-
-          console.log("Detected DS:", detectedDS);
-          console.log("Available address fields:", {
-            suburb: data.address.suburb,
-            village: data.address.village,
-            town: data.address.town,
-            hamlet: data.address.hamlet,
-            neighbourhood: data.address.neighbourhood,
-            city_district: data.address.city_district,
-            municipality: data.address.municipality
-          });
-
-          const districts = Object.keys(districtDivisionalSecretariats);
-          const matchedDistrict = districts.find(
-            (d) => d.toLowerCase() === detectedDistrict.toLowerCase()
-          );
-
-          if (matchedDistrict) {
-            const dsList = districtDivisionalSecretariats[matchedDistrict] || [];
-            console.log(`Available DS divisions for ${matchedDistrict}:`, dsList);
-            
-            // Try exact match first
-            let matchedDS = dsList.find(
-              (ds) => ds.toLowerCase() === detectedDS.toLowerCase()
-            );
-
-            console.log("Exact match result:", matchedDS);
-
-            // If no exact match, try partial matching
-            if (!matchedDS && detectedDS) {
-              matchedDS = dsList.find(
-                (ds) => ds.toLowerCase().includes(detectedDS.toLowerCase()) ||
-                       detectedDS.toLowerCase().includes(ds.toLowerCase())
-              );
-              console.log("Partial match result:", matchedDS);
-            }
-
-            // If still no match, try matching with any part of the address
-            if (!matchedDS) {
-              const allAddressParts = [
-                data.address.suburb,
-                data.address.village,
-                data.address.town,
-                data.address.hamlet,
-                data.address.neighbourhood,
-                data.address.city_district,
-                data.address.municipality,
-                data.address.postcode
-              ].filter(Boolean);
-
-              console.log("Trying address parts:", allAddressParts);
-
-              for (const addressPart of allAddressParts) {
-                matchedDS = dsList.find(
-                  (ds) => ds.toLowerCase().includes(addressPart.toLowerCase()) ||
-                         addressPart.toLowerCase().includes(ds.toLowerCase())
-                );
-                if (matchedDS) {
-                  console.log(`Found DS match with address part "${addressPart}":`, matchedDS);
-                  break;
-                }
-              }
-            }
-
-            // Set the results
-            setSelectedDistrict(matchedDistrict);
-            if (matchedDS) {
-              setSelectedDivisionalSecretariat(matchedDS);
-              setIsLocationAutoDetected(true);
-              setIsLoadingLocation(false);
-              
-              // Show success message for DS detection
-              setLocationError(
-                `DS detected: ${matchedDS}. Please verify if correct.`
-              );
-            } else {
-              // If no DS match found, still set district but select first DS as fallback
-              setSelectedDivisionalSecretariat(dsList[0] || "");
-              setIsLocationAutoDetected(true);
-              setIsLoadingLocation(false);
-              
-              // Show a warning that DS was auto-selected
-              if (dsList[0]) {
-                setLocationError(
-                  `District detected: ${matchedDistrict}. Please verify if correct.`
-                );
-              }
-            }
-          } else {
-            setLocationError(
-              `Detected district '${detectedDistrict}' not found in options. Please select manually.`
-            );
-            setIsLoadingLocation(false);
-          }
-        } catch (error) {
-          setLocationError("Failed to detect district and divisional secretariat from location.");
-          console.error(error);
-          setIsLoadingLocation(false);
-        }
-      },
-      (error) => {
-        setLocationError("Unable to retrieve your location");
-        console.error(error);
         setIsLoadingLocation(false);
-      }
+      },
+      () => {
+        setLocationError("Unable to retrieve location");
+        setIsLoadingLocation(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
     );
   };
 
   const validateForm = () => {
     const newErrors: any = {};
-
     if (!reporter_name.trim()) {
       newErrors.reporter_name = "Full name is required";
-    } else if (!/^[A-Za-z\s]+$/.test(reporter_name.trim())) {
-      newErrors.reporter_name = "Name can only contain letters and spaces";
     }
-
     const phoneError = validatePhoneNumber(contact_no);
-    if (phoneError) {
-      newErrors.contact_no = phoneError;
-    }
-
+    if (phoneError) newErrors.contact_no = phoneError;
     if (!description.trim()) {
       newErrors.description = "Symptoms description is required";
-    } else if (description.trim().length < 10) {
-      newErrors.description = "Symptoms should be at least 10 characters long";
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64 = reader.result as string;
+        setImage(base64); // ✅ for backend
+        setPreviewUrl(base64); // for preview
+      };
+      reader.readAsDataURL(file);
+      setFileName(file.name);
+    } else {
+      setFileName("");
+      setImage("");
+      setPreviewUrl("");
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setFileName("");
+    setImage("");
+    setPreviewUrl("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleClear = () => {
     formRef.current?.reset();
     setFileName("");
-    setFileUrl("");
+    setImage("");
+    setPreviewUrl("");
     setFullName("");
     setContactNo("");
     setSelectedDistrict("");
@@ -220,77 +153,47 @@ export default function SubmitSymptoms() {
     setDateTime("");
     setSymptoms("");
     setErrors({ reporter_name: "", contact_no: "", description: "" });
-    setLatitude(null);   
+    setLatitude(null);
     setLongitude(null);
     setLocationError("");
     setIsLocationAutoDetected(false);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    setFileName(file?.name || "");
-    if (file && file.type.startsWith("image/")) {
-      setFileUrl(URL.createObjectURL(file));
-    } else {
-      setFileUrl("");
-    }
-  };
-
-  const handleRemoveFile = () => {
-    setFileName("");
-    setFileUrl("");
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validateForm()) return;
 
-    try {
-      const reportData = {
-        reporter_name,
-        contact_no,
-        district,
-        divisional_secretariat,
-        date_time: new Date(date_time).toISOString(),
-        description,
-        image: image || "",
-        action: "Pending",
-        latitude,       
-        longitude 
-      };
+    const reportData = {
+      reporter_name,
+      contact_no,
+      district,
+      divisional_secretariat,
+      date_time: new Date(date_time).toISOString(),
+      description,
+      image, // ✅ base64 image
+      action: "Pending",
+      latitude,
+      longitude
+    };
 
+    try {
       const response = await fetch("http://localhost:5158/Symptoms/create", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(reportData)
       });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP error! ${response.status}: ${errorText}`);
-      }
-
-      const result = await response.json();
-      if (result.success || response.status === 200 || response.status === 201) {
-        setShowSuccess(true);
-        handleClear();
-      } else {
-        throw new Error(result.message || "Submission failed");
-      }
+      if (!response.ok) throw new Error(await response.text());
+      setShowSuccess(true);
+      handleClear();
     } catch (error) {
-      console.error("Error details:", error);
-      alert("Failed to submit symptoms. Please try again.");
+      console.error(error);
+      alert("Failed to submit. Try again.");
     }
   };
 
   const districts = Object.keys(districtDivisionalSecretariats);
   const divisionalSecretariats = district ? districtDivisionalSecretariats[district] : [];
-
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 pt-20 px-4 md:px-12 font-sans flex items-center justify-center">
       <div className="w-full max-w-2xl mx-auto p-0 md:p-6">
@@ -396,7 +299,7 @@ export default function SubmitSymptoms() {
                   </select>
                   <button
                     type="button"
-                    onClick={handleGetCurrentLocation}
+                    onClick={getCurrentLocation}
                     disabled={isLoadingLocation}
                     className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-150 flex items-center gap-2 ${
                       isLoadingLocation
@@ -421,15 +324,7 @@ export default function SubmitSymptoms() {
                   </button>
                 </div>
                 {locationError && (
-                  <p className={`text-sm mt-1 flex items-center gap-1 ${
-                    locationError.includes("detected:") ? "text-green-600" : "text-red-500"
-                  }`}>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    {locationError}
-                  </p>
+                  <p className="text-red-500 text-sm mt-1">{locationError}</p>
                 )}
               </div>
             </div>
@@ -463,7 +358,7 @@ export default function SubmitSymptoms() {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                        DS detected: {divisional_secretariat}. Please verify if correct.
+                        Location auto-detected: {district}, {divisional_secretariat}
                       </p>
                     ) : (
                       <p className="text-blue-600 text-sm flex items-center gap-1">
@@ -471,6 +366,11 @@ export default function SubmitSymptoms() {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
                         Location manually selected: {district}, {divisional_secretariat}
+                      </p>
+                    )}
+                    {isLocationAutoDetected && (
+                      <p className="text-gray-500 text-xs mt-1 ml-5">
+                        You can change the selections above if the auto-detected location is incorrect.
                       </p>
                     )}
                   </div>
@@ -586,5 +486,4 @@ export default function SubmitSymptoms() {
         )}
       </div>
     </div>
-  );
-}
+  );}

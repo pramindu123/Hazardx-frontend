@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import OngoingAidRequests from "./pages/DS/OngoingAidRequests";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Alerts from "./pages/Alerts";
@@ -60,6 +61,7 @@ function AppContent() {
           <Route index element={<DSDashboardHome />} />
           <Route path="submit-manual-reports" element={<SubmitManualReport />} />
           <Route path="resolved-alerts" element={<ResolvedAlerts />} />
+          <Route path="ongoing-aid-requests" element={<OngoingAidRequests />} />
           <Route path="approve-aid-requests" element={<ApproveAidRequests />} />
           <Route path="volunteers" element={<Volunteers />} />
           {/* Add other GN dashboard child routes here */}

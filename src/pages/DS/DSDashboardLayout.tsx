@@ -94,7 +94,8 @@ export default function DSDashboardLayout() {
               : "bg-white text-gray-900 hover:bg-blue-100") +
             " rounded-full py-2 px-6 font-semibold shadow transition text-left w-full"}>Dashboard</NavLink>
           <NavLink to="/ds-dashboard/submit-manual-reports" className="bg-white py-2 px-6 rounded-full text-left w-full hover:bg-blue-100">Submit Manual Reports</NavLink>
-          <NavLink to="/ds-dashboard/resolved-alerts" className="bg-white py-2 px-6 rounded-full text-left w-full hover:bg-blue-100">Ongoing Alerts</NavLink>
+          <NavLink to="/ds-dashboard/ongoing-aid-requests" className="bg-white py-2 px-6 rounded-full text-left w-full hover:bg-blue-100">Ongoing Aid Requests</NavLink>
+          <NavLink to="/ds-dashboard/resolved-alerts" className="bg-white py-2 px-6 rounded-full text-left w-full hover:bg-blue-100">Resolved Alerts</NavLink>
           <NavLink to="/ds-dashboard/approve-aid-requests" className="bg-white py-2 px-6 rounded-full text-left w-full hover:bg-blue-100">Approve Aid Requests</NavLink>
           <NavLink to="/ds-dashboard/volunteers" className="bg-white py-2 px-6 rounded-full text-left w-full hover:bg-blue-100">Volunteers</NavLink>
         </nav>
