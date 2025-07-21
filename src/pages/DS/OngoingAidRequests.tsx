@@ -73,7 +73,7 @@ const OngoingAidRequests: React.FC = () => {
             <table className="w-full mt-6 border-collapse">
               <thead>
                 <tr className="bg-blue-100">
-                  <th className="py-2 px-4 border">Aid ID</th>
+                  {/* Aid ID column removed */}
                   <th className="py-2 px-4 border">Full Name</th>
                   <th className="py-2 px-4 border">Contact No</th>
                   <th className="py-2 px-4 border">Type of Support</th>
@@ -85,7 +85,7 @@ const OngoingAidRequests: React.FC = () => {
               <tbody>
                 {requests.map((req, idx) => (
                   <tr key={req.aid_id} className="hover:bg-blue-50">
-                    <td className="py-2 px-4 border">{req.aid_id}</td>
+                    {/* Aid ID cell removed */}
                     <td className="py-2 px-4 border">{req.full_name}</td>
                     <td className="py-2 px-4 border">{req.contact_no}</td>
                     <td className="py-2 px-4 border">{req.type_of_support}</td>

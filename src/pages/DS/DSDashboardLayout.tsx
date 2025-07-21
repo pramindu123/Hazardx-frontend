@@ -97,6 +97,7 @@ export default function DSDashboardLayout() {
           <NavLink to="/ds-dashboard/ongoing-aid-requests" className="bg-white py-2 px-6 rounded-full text-left w-full hover:bg-blue-100">Ongoing Aid Requests</NavLink>
           <NavLink to="/ds-dashboard/resolved-alerts" className="bg-white py-2 px-6 rounded-full text-left w-full hover:bg-blue-100">Resolved Alerts</NavLink>
           <NavLink to="/ds-dashboard/approve-aid-requests" className="bg-white py-2 px-6 rounded-full text-left w-full hover:bg-blue-100">Approve Aid Requests</NavLink>
+          <NavLink to="/ds-dashboard/approve-volunteer-contributions" className="bg-white py-2 px-6 rounded-full text-left w-full hover:bg-blue-100">Approve Volunteer Contributions</NavLink>
           <NavLink to="/ds-dashboard/volunteers" className="bg-white py-2 px-6 rounded-full text-left w-full hover:bg-blue-100">Volunteers</NavLink>
         </nav>
 

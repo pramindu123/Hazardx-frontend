@@ -1,10 +1,33 @@
-import React, { useState } from "react";
 
-export default function AddContribution() {
-  const [district, setDistrict] = useState("");
-  const [type, setType] = useState("");
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+
+interface AddContributionProps {
+  initialAidRequestId?: string;
+  initialType?: string;
+  initialDescription?: string;
+  onBack?: () => void;
+}
+
+export default function AddContribution(props: AddContributionProps) {
+  const location = useLocation();
+  const state = location.state || {};
+  const initialAidRequestId = state.initialAidRequestId ?? props.initialAidRequestId ?? "";
+  const initialType = state.initialType ?? props.initialType ?? "";
+  const initialDescription = state.initialDescription ?? props.initialDescription ?? "";
+  const onBack = props.onBack;
+
+  const [aidRequestId, setAidRequestId] = useState(initialAidRequestId);
+  const [type, setType] = useState(initialType);
   const [otherType, setOtherType] = useState("");
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState(initialDescription);
+  const [image, setImage] = useState<string>("");
+
+  useEffect(() => {
+    setAidRequestId(initialAidRequestId);
+    setType(initialType);
+    setDescription(initialDescription);
+  }, [initialAidRequestId, initialType, initialDescription]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,9 +44,10 @@ const volunteerId = volunteerData.userId;
 
     const payload = {
       volunteer_id: parseInt(volunteerId),
-      district: district,
+      aid_request_id: aidRequestId,
       type_support: type === "Other" ? otherType : type,
       description: description,
+      image: image,
     };
 
     try {
@@ -37,10 +61,11 @@ const volunteerId = volunteerData.userId;
 
       if (response.ok) {
         alert("Contribution submitted successfully!");
-        setDistrict("");
+        setAidRequestId("");
         setType("");
         setOtherType("");
         setDescription("");
+        setImage("");
       } else {
         const errorText = await response.text();
         console.error("Server error:", errorText);
@@ -57,16 +82,25 @@ const volunteerId = volunteerData.userId;
       <h1 className="text-3xl md:text-4xl font-bold mb-10 text-gray-900 text-center">
         Add Contribution
       </h1>
+      {onBack && (
+        <button
+          className="mb-6 px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-full font-semibold text-gray-700 transition"
+          type="button"
+          onClick={onBack}
+        >
+          ← Back
+        </button>
+      )}
       <form
         className="w-full max-w-2xl bg-white/90 rounded-3xl shadow-xl border border-blue-100 p-8 flex flex-col gap-8"
         onSubmit={handleSubmit}
       >
         <div className="flex flex-col md:flex-row md:items-center gap-4">
-          <label className="md:w-1/3 text-2xl font-medium text-gray-900">District :</label>
+          <label className="md:w-1/3 text-2xl font-medium text-gray-900">Aid Request ID Number :</label>
           <input
-            type="text"
-            value={district}
-            onChange={e => setDistrict(e.target.value)}
+            type="number"
+            value={aidRequestId}
+            onChange={e => setAidRequestId(e.target.value)}
             required
             className="flex-1 rounded-lg bg-gray-100 px-4 py-2 text-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
           />
@@ -110,6 +144,35 @@ const volunteerId = volunteerData.userId;
           />
         </div>
 
+        <div className="flex flex-col md:flex-row md:items-center gap-4">
+          <label className="md:w-1/3 text-2xl font-medium text-gray-900">Image :</label>
+          <div className="flex-1">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={e => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    setImage(reader.result as string);
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
+              className="rounded-lg bg-gray-100 px-4 py-2 text-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            />
+            {image && (
+              <div className="mt-4 flex justify-center">
+                <img
+                  src={image}
+                  alt="Preview"
+                  className="w-24 h-24 object-cover rounded border"
+                />
+              </div>
+            )}
+          </div>
+        </div>
         <div className="flex justify-end">
           <button
             type="submit"

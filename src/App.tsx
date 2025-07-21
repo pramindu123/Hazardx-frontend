@@ -1,12 +1,13 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import OngoingAidRequests from "./pages/DS/OngoingAidRequests";
+import ApproveVolunteerContributions from "./pages/DS/ApproveVolunteerContributions";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Alerts from "./pages/Alerts";
 import SubmitSymptoms from "./pages/SubmitSymptoms";
 import RequestAid from "./pages/RequestAid";
-import EmergencyAidRequest from "./pages/EmergencyAidRequests";
+import EmergencyAidRequest from "./pages/volunteer/EmergencyAidRequest";
 import PostDisasterAidRequest from "./pages/PostDisasterAidRequest";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -15,6 +16,7 @@ import DashboardHome from "./pages/volunteer/DashboardHome";
 import MyContributions from "./pages/volunteer/MyContributions";
 import AddContribution from "./pages/volunteer/AddContribution";
 import SystemSettings from "./pages/volunteer/SystemSettings";
+import AidRequests from "./pages/volunteer/AidRequests";
 import DSDashboardLayout from "./pages/DS/DSDashboardLayout";
 import DSDashboardHome from "./pages/DS/DSDashboardHome";
 import SubmitManualReport from "./pages/DS/SubmitManualReport";
@@ -54,6 +56,9 @@ function AppContent() {
           <Route index element={<DashboardHome />} />
           <Route path="my-contributions" element={<MyContributions />} />
           <Route path="add-contribution" element={<AddContribution />} />
+          <Route path="aid-requests" element={<AidRequests />} />
+          <Route path="emergency-aid-request" element={<EmergencyAidRequest />} />
+          <Route path="post-disaster-aid-request" element={<PostDisasterAidRequest />} />
           <Route path="settings" element={<SystemSettings />} />
         </Route>
         {/* General DS dashboard routes */}
@@ -63,6 +68,7 @@ function AppContent() {
           <Route path="resolved-alerts" element={<ResolvedAlerts />} />
           <Route path="ongoing-aid-requests" element={<OngoingAidRequests />} />
           <Route path="approve-aid-requests" element={<ApproveAidRequests />} />
+          <Route path="approve-volunteer-contributions" element={<ApproveVolunteerContributions />} />
           <Route path="volunteers" element={<Volunteers />} />
           {/* Add other GN dashboard child routes here */}
         </Route>
