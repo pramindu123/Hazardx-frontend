@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { API_BASE_URL } from "../../config/api";
 
 interface AddContributionProps {
   initialAidRequestId?: string;
@@ -51,7 +52,7 @@ const volunteerId = volunteerData.userId;
     };
 
     try {
-      const response = await fetch("https://localhost:7096/Contribution/add", {
+      const response = await fetch(`${API_BASE_URL}/Contribution/add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

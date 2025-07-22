@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { API_BASE_URL } from "../../config/api";
 
 type Contribution = {
   district: string;
@@ -28,11 +29,11 @@ export default function DashboardHome() {
 
     const fetchData = async () => {
       try {
-        const totalRes = await fetch(`https://localhost:7096/Contribution/total/${userId}`);
+        const totalRes = await fetch(`${API_BASE_URL}/Contribution/total/${userId}`);
         if (!totalRes.ok) throw new Error("Failed to fetch total contributions");
         const totalData = await totalRes.json();
 
-        const latestRes = await fetch(`https://localhost:7096/Contribution/latest/${userId}`);
+        const latestRes = await fetch(`${API_BASE_URL}/Contribution/latest/${userId}`);
         let latestData: Contribution | null = null;
         if (latestRes.ok) {
           latestData = await latestRes.json();

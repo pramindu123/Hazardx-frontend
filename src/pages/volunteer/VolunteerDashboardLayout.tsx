@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../../config/api";
 
 export default function VolunteerDashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -33,7 +34,7 @@ export default function VolunteerDashboardLayout() {
 
     try {
       const response = await fetch(
-        `http://localhost:5158/Volunteer/update-availability?userId=${volunteer.userId}&newStatus=${newStatus}`,
+        `${API_BASE_URL}/Volunteer/update-availability?userId=${volunteer.userId}&newStatus=${newStatus}`,
         { method: "PUT" }
       );
 
