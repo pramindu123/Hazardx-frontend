@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import districtDivisionalSecretariats from "../data/districtDivisionalSecretariats";
 import { CheckCircle, MapPin } from "lucide-react";
+import { API_BASE_URL } from "../config/api";
 
 export default function PostDisasterAidRequest() {
   const [formData, setFormData] = useState({
@@ -137,7 +138,7 @@ export default function PostDisasterAidRequest() {
         request_type: "postDisaster"
       };
 
-      const res = await fetch("http://localhost:5158/AidRequest/create", {
+      const res = await fetch(`${API_BASE_URL}/AidRequest/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
