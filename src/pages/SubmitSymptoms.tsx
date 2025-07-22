@@ -177,7 +177,7 @@ export default function SubmitSymptoms() {
     };
 
     try {
-      const response = await fetch("http://localhost:5158/Symptoms/create", {
+      const response = await fetch("https://hazardx-backend-production.up.railway.app/Symptoms/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(reportData)
