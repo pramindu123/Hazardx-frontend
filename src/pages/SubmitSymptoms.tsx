@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import districtDivisionalSecretariats from "../data/districtDivisionalSecretariats";
+import { API_BASE_URL } from "../config/api";
 
 export default function SubmitSymptoms() {
   const formRef = useRef<HTMLFormElement>(null);
@@ -177,7 +178,7 @@ export default function SubmitSymptoms() {
     };
 
     try {
-      const response = await fetch("https://hazardx-backend-production.up.railway.app/Symptoms/create", {
+      const response = await fetch(`${API_BASE_URL}/Symptoms/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(reportData)
