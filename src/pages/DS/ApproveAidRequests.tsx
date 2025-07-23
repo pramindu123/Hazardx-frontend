@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { API_BASE_URL } from "../../config/api";
 
 type AidRequest = {
   aid_id: number;
@@ -37,10 +38,10 @@ export default function ApproveAidRequests() {
     }
 
     fetch(
-  `http://localhost:5158/AidRequest/pending-post-disaster?divisionalSecretariat=${encodeURIComponent(
-    divisionalSecretariat
-  )}`
-)
+      `${API_BASE_URL}/AidRequest/pending-post-disaster?divisionalSecretariat=${encodeURIComponent(
+        divisionalSecretariat
+      )}`
+    )
       .then((res) => res.json())
       .then((data) => {
         setRequests(data);
@@ -54,7 +55,7 @@ export default function ApproveAidRequests() {
 
   const handleAction = async (id: number, action: "Approved" | "Rejected") => {
     try {
-      const res = await fetch(`http://localhost:5158/AidRequest/updateStatus`, {
+      const res = await fetch(`${API_BASE_URL}/AidRequest/updateStatus`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -76,7 +77,7 @@ export default function ApproveAidRequests() {
 
       if (divisionalSecretariat) {
         const refreshed = await fetch(
-          `http://localhost:5158/AidRequest/pending-post-disaster?divisionalSecretariat=${encodeURIComponent(
+          `${API_BASE_URL}/AidRequest/pending-post-disaster?divisionalSecretariat=${encodeURIComponent(
             divisionalSecretariat
           )}`
         );

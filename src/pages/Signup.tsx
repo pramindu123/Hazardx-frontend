@@ -245,6 +245,7 @@ export default function Signup() {
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import districtDivisionalSecretariats from "../data/districtDivisionalSecretariats";
+import { API_BASE_URL } from "../config/api";
 
 export default function Signup() {
   const [name, setName] = useState("");
@@ -299,7 +300,7 @@ export default function Signup() {
     };
 
     try {
-      const response = await fetch("http://localhost:5158/Volunteer/signup", {
+      const response = await fetch(`${API_BASE_URL}/Volunteer/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(volunteerData),

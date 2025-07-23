@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { API_BASE_URL } from "../../config/api";
 
 type DmcApprovalStatus = "Pending" | "Approved" | "Rejected";
 
@@ -45,9 +46,7 @@ export default function DMCDashboardHome() {
   const fetchAllAidRequests = async (district: string) => {
     try {
       const res = await fetch(
-        `http://localhost:5158/AidRequest/all-dmc?district=${encodeURIComponent(
-          district
-        )}`
+        `${API_BASE_URL}/AidRequest/all-dmc?district=${encodeURIComponent(district)}`
       );
       if (!res.ok) throw new Error("Failed to fetch aid requests");
       const data = await res.json();

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { API_BASE_URL } from "../../config/api";
 
 interface Volunteer {
   userId: number;
@@ -30,7 +31,7 @@ export default function DMCVolunteers() {
       return;
     }
 
-    fetch(`http://localhost:5158/Volunteer/by-district?district=${district}`)
+    fetch(`${API_BASE_URL}/Volunteer/by-district?district=${district}`)
       .then((res) => res.json())
       .then((data) => {
         const volunteersWithAvailability = data.map((vol: any) => ({
