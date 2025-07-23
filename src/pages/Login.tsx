@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { API_BASE_URL } from "../config/api";
 
 export default function Login() {
   const [role, setRole] = useState("DS Officer");
@@ -12,7 +11,7 @@ export default function Login() {
     e.preventDefault();
 
     try {
-      const response = await fetch(`${API_BASE_URL}/User/login`, {
+      const response = await fetch("http://localhost:5158/User/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import EmergencyAidRequest from "./EmergencyAidRequest";
 import PostDisasterAidRequestTable from "./PostDisasterAidRequestTable";
 
-
-
 export default function AidRequests() {
   const navigate = useNavigate();
   const [showEmergency, setShowEmergency] = useState(false);
@@ -31,23 +29,31 @@ export default function AidRequests() {
           </button>
         </div>
       ) : showEmergency ? (
+        // @ts-ignore: EmergencyAidRequest expects props for navigation
         <EmergencyAidRequest
           onBack={() => setShowEmergency(false)}
-          onAddContribution={row => {
-            navigate("/volunteer-dashboard/add-contribution", { state: {
-              initialAidRequestId: row.aid_request_id?.toString() || "",
-              initialDescription: ""
-            }});
+          onAddContribution={(row: { aid_id?: number; district?: string }) => {
+            navigate("/volunteer-dashboard/add-contribution", {
+              state: {
+                initialAidRequestId: row.aid_id?.toString() || "",
+                initialDescription: "",
+                initialDistrict: row.district || "", // <-- Added district here
+              },
+            });
           }}
         />
       ) : (
+        // @ts-ignore: PostDisasterAidRequestTable expects props for navigation
         <PostDisasterAidRequestTable
           onBack={() => setShowPostDisaster(false)}
-          onAddContribution={row => {
-            navigate("/volunteer-dashboard/add-contribution", { state: {
-              initialAidRequestId: row.aid_request_id?.toString() || "",
-              initialDescription: ""
-            }});
+          onAddContribution={(row: { aid_id?: number; district?: string }) => {
+            navigate("/volunteer-dashboard/add-contribution", {
+              state: {
+                initialAidRequestId: row.aid_id?.toString() || "",
+                initialDescription: "",
+                initialDistrict: row.district || "", // <-- Added district here
+              },
+            });
           }}
         />
       )}

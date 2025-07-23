@@ -1,58 +1,67 @@
-
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { API_BASE_URL } from "../../config/api";
 
 interface AddContributionProps {
   initialAidRequestId?: string;
   initialType?: string;
   initialDescription?: string;
+  initialDistrict?: string; // ✅ allow district as prop too
   onBack?: () => void;
 }
 
 export default function AddContribution(props: AddContributionProps) {
   const location = useLocation();
   const state = location.state || {};
+
   const initialAidRequestId = state.initialAidRequestId ?? props.initialAidRequestId ?? "";
   const initialType = state.initialType ?? props.initialType ?? "";
   const initialDescription = state.initialDescription ?? props.initialDescription ?? "";
+  const initialDistrict = state.initialDistrict ?? props.initialDistrict ?? ""; // ✅ get district
+
   const onBack = props.onBack;
 
   const [aidRequestId, setAidRequestId] = useState(initialAidRequestId);
   const [type, setType] = useState(initialType);
   const [otherType, setOtherType] = useState("");
   const [description, setDescription] = useState(initialDescription);
+  const [district, setDistrict] = useState(initialDistrict); // ✅ store aid request's district
   const [image, setImage] = useState<string>("");
 
   useEffect(() => {
     setAidRequestId(initialAidRequestId);
     setType(initialType);
     setDescription(initialDescription);
-  }, [initialAidRequestId, initialType, initialDescription]);
+    setDistrict(initialDistrict); // ✅ initialize district from nav
+  }, [initialAidRequestId, initialType, initialDescription, initialDistrict]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const volunteerData = JSON.parse(localStorage.getItem("volunteerData") || "null");
 
-if (!volunteerData || !volunteerData.userId) {
-  alert("You must be logged in as a volunteer to submit a contribution.");
-  return;
-}
+    if (!volunteerData || !volunteerData.userId) {
+      alert("You must be logged in as a volunteer to submit a contribution.");
+      return;
+    }
 
-const volunteerId = volunteerData.userId;
+    if (!district) {
+      alert("No district found for the aid request. Cannot submit contribution.");
+      return;
+    }
 
+    const volunteerId = volunteerData.userId;
 
     const payload = {
       volunteer_id: parseInt(volunteerId),
-      aid_request_id: aidRequestId,
+      aid_id: parseInt(aidRequestId),
+      district: district, // ✅ use aid request's district
       type_support: type === "Other" ? otherType : type,
       description: description,
-      image: image,
+      image: image
     };
 
     try {
-      const response = await fetch(`${API_BASE_URL}/Contribution/add`, {
+      const response = await fetch("http://localhost:5158/Contribution/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -97,22 +106,26 @@ const volunteerId = volunteerData.userId;
         onSubmit={handleSubmit}
       >
         <div className="flex flex-col md:flex-row md:items-center gap-4">
-          <label className="md:w-1/3 text-2xl font-medium text-gray-900">Aid Request ID Number :</label>
+          <label className="md:w-1/3 text-2xl font-medium text-gray-900">
+            Aid Request ID Number :
+          </label>
           <input
             type="number"
             value={aidRequestId}
-            onChange={e => setAidRequestId(e.target.value)}
+            onChange={(e) => setAidRequestId(e.target.value)}
             required
             className="flex-1 rounded-lg bg-gray-100 px-4 py-2 text-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
           />
         </div>
 
         <div className="flex flex-col md:flex-row md:items-center gap-4">
-          <label className="md:w-1/3 text-2xl font-medium text-gray-900">Type of Support :</label>
+          <label className="md:w-1/3 text-2xl font-medium text-gray-900">
+            Type of Support :
+          </label>
           <div className="flex-1 flex flex-col gap-2">
             <select
               value={type}
-              onChange={e => setType(e.target.value)}
+              onChange={(e) => setType(e.target.value)}
               required
               className="rounded-lg bg-gray-100 px-4 py-2 text-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
             >
@@ -127,7 +140,7 @@ const volunteerId = volunteerData.userId;
                 type="text"
                 placeholder="Please specify"
                 value={otherType}
-                onChange={e => setOtherType(e.target.value)}
+                onChange={(e) => setOtherType(e.target.value)}
                 required
                 className="rounded-lg bg-gray-100 px-4 py-2 text-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
               />
@@ -136,22 +149,26 @@ const volunteerId = volunteerData.userId;
         </div>
 
         <div className="flex flex-col md:flex-row md:items-center gap-4">
-          <label className="md:w-1/3 text-2xl font-medium text-gray-900">Description :</label>
+          <label className="md:w-1/3 text-2xl font-medium text-gray-900">
+            Description :
+          </label>
           <textarea
             value={description}
-            onChange={e => setDescription(e.target.value)}
+            onChange={(e) => setDescription(e.target.value)}
             required
             className="flex-1 rounded-lg bg-gray-100 px-4 py-2 text-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 min-h-[80px]"
           />
         </div>
 
         <div className="flex flex-col md:flex-row md:items-center gap-4">
-          <label className="md:w-1/3 text-2xl font-medium text-gray-900">Image :</label>
+          <label className="md:w-1/3 text-2xl font-medium text-gray-900">
+            Image :
+          </label>
           <div className="flex-1">
             <input
               type="file"
               accept="image/*"
-              onChange={e => {
+              onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
                   const reader = new FileReader();
@@ -174,6 +191,7 @@ const volunteerId = volunteerData.userId;
             )}
           </div>
         </div>
+
         <div className="flex justify-end">
           <button
             type="submit"

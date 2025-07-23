@@ -1,6 +1,5 @@
 
 import React, { useEffect, useState } from "react";
-import { API_BASE_URL } from "../../config/api";
 
 type Contribution = {
   district: string;
@@ -25,7 +24,7 @@ export default function MyContributions() {
       const { userId } = JSON.parse(volunteerData);
 
       try {
-        const response = await fetch(`${API_BASE_URL}/Contribution/volunteer/${userId}`);
+        const response = await fetch(`https://localhost:7096/Contribution/volunteer/${userId}`);
         if (!response.ok) {
           throw new Error("Failed to fetch contributions");
         }

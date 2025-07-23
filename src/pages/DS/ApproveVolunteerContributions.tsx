@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
-// Dummy type for volunteer contributions
 interface VolunteerContribution {
+  contribution_id: number;
   volunteer_id: number;
   volunteer_name: string;
   volunteer_contact: string;
@@ -17,42 +17,70 @@ export default function ApproveVolunteerContributions() {
   const [removedMessage, setRemovedMessage] = useState<string>("");
 
   useEffect(() => {
-    // Replace with API call in production
-    const dummy: VolunteerContribution[] = [
-      {
-        volunteer_id: 1,
-        volunteer_name: "Kasun Perera",
-        volunteer_contact: "0771234567",
-        type_of_support: "Food Packets",
-        description: "Distributed 50 food packets in Matara.",
-        image: "https://via.placeholder.com/100x100.png?text=Food+Packets",
-        status: "Pending"
-      },
-      {
-        volunteer_id: 2,
-        volunteer_name: "Nimali Silva",
-        volunteer_contact: "0719876543",
-        type_of_support: "Medical Supplies",
-        description: "Provided first aid kits to 20 families.",
-        image: "https://via.placeholder.com/100x100.png?text=Medical+Supplies",
-        status: "Pending"
+    const fetchPending = async () => {
+      try {
+        
+        const dsDataString = localStorage.getItem("dsOfficerData");
+        const dsData = dsDataString ? JSON.parse(dsDataString) : null;
+        const divisional_secretariat = dsData?.divisionalSecretariat?.trim();
+
+        if (!divisional_secretariat) {
+          alert("No division found in local storage!");
+          return;
+        }
+
+        // ✅ Fetch pending contributions filtered by division
+        const res = await fetch(
+          `http://localhost:5158/Contribution/pending?divisional_secretariat=${encodeURIComponent(
+            divisional_secretariat
+          )}`
+        );
+
+        if (!res.ok) throw new Error("Failed to fetch");
+
+        const data = await res.json();
+        setContributions(data);
+      } catch (err) {
+        console.error(err);
+        alert("Failed to load contributions");
+      } finally {
+        setIsLoading(false);
       }
-    ];
-    setContributions(dummy);
-    setIsLoading(false);
+    };
+
+    fetchPending();
   }, []);
 
-  const handleAction = (id: number, action: "Approved" | "Rejected") => {
-    setContributions(prev =>
-      prev.map(c =>
-        c.volunteer_id === id ? { ...c, status: action } : c
-      )
-    );
-    setTimeout(() => {
-      setContributions(prev => prev.filter(c => c.volunteer_id !== id));
-      setRemovedMessage(`Contribution ${action.toLowerCase()} and removed.`);
-      setTimeout(() => setRemovedMessage("") , 2500);
-    }, 800);
+  const handleAction = async (
+    contributionId: number,
+    action: "Approved" | "Rejected"
+  ) => {
+    try {
+      const endpoint = action === "Approved" ? "approve" : "reject";
+      const url = `http://localhost:5158/Contribution/${endpoint}/${contributionId}`;
+
+      const res = await fetch(url, { method: "POST" });
+      if (!res.ok) throw new Error(`Failed to ${action.toLowerCase()} contribution`);
+
+      // ✅ Update local state immediately
+      setContributions((prev) =>
+        prev.map((c) =>
+          c.contribution_id === contributionId ? { ...c, status: action } : c
+        )
+      );
+
+      // ✅ Show feedback and remove after delay
+      setTimeout(() => {
+        setContributions((prev) =>
+          prev.filter((c) => c.contribution_id !== contributionId)
+        );
+        setRemovedMessage(`Contribution ${action.toLowerCase()} and removed.`);
+        setTimeout(() => setRemovedMessage(""), 2500);
+      }, 800);
+    } catch (err) {
+      console.error(err);
+      alert(`Error while trying to ${action.toLowerCase()} the contribution`);
+    }
   };
 
   return (
@@ -71,12 +99,11 @@ export default function ApproveVolunteerContributions() {
         <div className="flex flex-col gap-6">
           {contributions.map((c) => (
             <div
-              key={c.volunteer_id}
+              key={c.contribution_id}
               className="bg-white border border-black rounded-xl p-6 shadow flex flex-col gap-2"
             >
               <div className="flex flex-col md:flex-row md:justify-between md:items-center">
                 <div className="flex flex-col gap-2 pr-8">
-                  {/* Volunteer ID removed from display */}
                   <div>
                     <span className="font-semibold">Name:</span>
                     <span className="ml-2">{c.volunteer_name}</span>
@@ -91,28 +118,41 @@ export default function ApproveVolunteerContributions() {
                   </div>
                 </div>
                 <div>
-                  <img src={c.image} alt={c.type_of_support} className="w-24 h-24 object-cover rounded border" />
+                  <img
+                    src={c.image}
+                    alt={c.type_of_support}
+                    className="w-24 h-24 object-cover rounded border"
+                  />
                 </div>
               </div>
               <div className="mt-2">
-                <span className="font-semibold">Description:</span> {c.description}
+                <span className="font-semibold">Description:</span>{" "}
+                {c.description}
               </div>
               <div className="flex gap-4 mt-2">
                 <button
                   className="border border-black rounded px-6 py-2 font-semibold"
-                  onClick={() => handleAction(c.volunteer_id, "Approved")}
+                  onClick={() => handleAction(c.contribution_id, "Approved")}
                   disabled={c.status !== "Pending"}
                 >
                   Approve
                 </button>
                 <button
                   className="border border-black rounded px-6 py-2 font-semibold"
-                  onClick={() => handleAction(c.volunteer_id, "Rejected")}
+                  onClick={() => handleAction(c.contribution_id, "Rejected")}
                   disabled={c.status !== "Pending"}
                 >
                   Reject
                 </button>
-                <span className={`ml-auto font-bold ${c.status === "Approved" ? "text-green-600" : c.status === "Rejected" ? "text-red-600" : "text-gray-600"}`}>
+                <span
+                  className={`ml-auto font-bold ${
+                    c.status === "Approved"
+                      ? "text-green-600"
+                      : c.status === "Rejected"
+                      ? "text-red-600"
+                      : "text-gray-600"
+                  }`}
+                >
                   {c.status}
                 </span>
               </div>

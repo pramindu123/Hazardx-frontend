@@ -77,13 +77,15 @@ interface AidRequest {
   divisional_secretariat: string;
   latitude: number;
   longitude: number;
-  gn_officer?: string;
-  gn_contact_no?: string;
+  contact_no?: string; 
 }
 
 export default function Home() {
   const [aidRequests, setAidRequests] = useState<AidRequest[]>([]);
   const [alerts, setAlerts] = useState<Alert[]>([]);
+
+  const [showAlerts, setShowAlerts] = useState(true);
+  const [showAidRequests, setShowAidRequests] = useState(true);
 
   const [activeVolunteers, setActiveVolunteers] = useState(0);
   const [alertsSent, setAlertsSent] = useState(0);
@@ -112,18 +114,20 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const fetchAidRequests = async () => {
-      try {
-        const res = await fetch("http://localhost:5158/AidRequest/ds-approved");
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        const data = await res.json();
-        setAidRequests(data);
-      } catch (err) {
-        console.error("Error fetching aid requests:", err);
-      }
-    };
-    fetchAidRequests();
-  }, []);
+  const fetchAidRequests = async () => {
+    try {
+      // Fetch ongoing aid requests (both emergency and post-disaster)
+      const res = await fetch("http://localhost:5158/AidRequest/ongoing");
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const data = await res.json();
+      setAidRequests(data);
+    } catch (err) {
+      console.error("Error fetching aid requests:", err);
+    }
+  };
+  fetchAidRequests();
+}, []);
+
 
   useEffect(() => {
     const fetchAlerts = async () => {
@@ -245,10 +249,34 @@ export default function Home() {
         <p className="text-lg text-gray-700 mb-6">
           View affected areas, aid requests, and deliveries.
         </p>
+
+        <div className="flex gap-6 mb-4">
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={showAlerts}
+              onChange={() => setShowAlerts(!showAlerts)}
+            />
+            Show Alerts
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={showAidRequests}
+              onChange={() => setShowAidRequests(!showAidRequests)}
+            />
+            Show Aid Requests
+          </label>
+        </div>
+
         <div className="w-full h-[600px] rounded-xl overflow-hidden shadow-lg">
-          <DisasterMap approvedAidRequests={filtered} approvedAlerts={alerts} />
+          <DisasterMap
+            approvedAidRequests={showAidRequests ? filtered : []}
+            approvedAlerts={showAlerts ? alerts : []}
+          />
         </div>
       </section>
+
 
       {/* Stats */}
       <section className="py-20 bg-white" ref={statsRef}>
@@ -265,86 +293,137 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Aid Table */}
-      <section className="w-full mt-12">
-        <div className="bg-white rounded-2xl shadow-lg p-8 md:p-12">
-          <h2 className="text-2xl md:text-3xl font-bold mb-6 text-blue-800">Recent Aid Requests</h2>
-          <div className="mb-6 bg-blue-50 rounded-xl p-4 flex flex-wrap gap-4 items-center">
-            <span className="font-semibold text-gray-700">Filter by:</span>
-            <select className="px-3 py-2 rounded-lg border" value={selectedType || ""} onChange={e => {
-              setSelectedType(e.target.value || null);
-              setPage(1);
-            }}>
-              <option value="">Request Type</option>
-              {aidTypes.map(t => <option key={t} value={t}>{t}</option>)}
-            </select>
-            <select className="px-3 py-2 rounded-lg border" value={selectedDistrict || ""} onChange={e => {
-              setSelectedDistrict(e.target.value || null);
-              setSelectedDivisionalSecretariat(null);
-              setPage(1);
-            }}>
-              <option value="">District</option>
-              {districts.map(d => <option key={d} value={d}>{d}</option>)}
-            </select>
-            <select className="px-3 py-2 rounded-lg border" value={selectedDivisionalSecretariat || ""} onChange={e => {
-              setSelectedDivisionalSecretariat(e.target.value || null);
-              setPage(1);
-            }}>
-              <option value="">Divisional Secretariat</option>
-              {divisionalSecretariats.map(ds => <option key={ds} value={ds}>{ds}</option>)}
-            </select>
-            <button onClick={resetFilters} className="px-4 py-2 bg-gray-200 rounded-lg font-semibold hover:bg-gray-300">
-              Reset
-            </button>
-          </div>
+     {/* Aid Table */}
+<section className="w-full mt-12">
+  <div className="bg-white rounded-2xl shadow-lg p-8 md:p-12">
+    <h2 className="text-2xl md:text-3xl font-bold mb-6 text-blue-800">Recent Aid Requests</h2>
+    <div className="mb-6 bg-blue-50 rounded-xl p-4 flex flex-wrap gap-4 items-center">
+      <span className="font-semibold text-gray-700">Filter by:</span>
+      <select className="px-3 py-2 rounded-lg border" value={selectedType || ""} onChange={e => {
+        setSelectedType(e.target.value || null);
+        setPage(1);
+      }}>
+        <option value="">Request Type</option>
+        {aidTypes.map(t => <option key={t} value={t}>{t}</option>)}
+      </select>
+      <select className="px-3 py-2 rounded-lg border" value={selectedDistrict || ""} onChange={e => {
+        setSelectedDistrict(e.target.value || null);
+        setSelectedDivisionalSecretariat(null);
+        setPage(1);
+      }}>
+        <option value="">District</option>
+        {districts.map(d => <option key={d} value={d}>{d}</option>)}
+      </select>
+      <select className="px-3 py-2 rounded-lg border" value={selectedDivisionalSecretariat || ""} onChange={e => {
+        setSelectedDivisionalSecretariat(e.target.value || null);
+        setPage(1);
+      }}>
+        <option value="">Divisional Secretariat</option>
+        {divisionalSecretariats.map(ds => <option key={ds} value={ds}>{ds}</option>)}
+      </select>
+      <button onClick={resetFilters} className="px-4 py-2 bg-gray-200 rounded-lg font-semibold hover:bg-gray-300">
+        Reset
+      </button>
+    </div>
 
-          <div className="w-full overflow-x-auto">
-            <table className="min-w-[900px] w-full divide-y divide-gray-200 rounded-xl overflow-hidden shadow">
-              <thead className="bg-gradient-to-r from-blue-600 to-purple-600">
-                <tr>
-                  {["#", "Recipient Name", "Request Type", "District", "Divisional Secretariat", "GN Officer", "GN Contact No"].map(header => (
-                    <th key={header} className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                      {header}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-100">
-                {paginated.length === 0 ? (
-                  <tr><td colSpan={7} className="px-6 py-8 text-center text-gray-400">No aid requests found.</td></tr>
-                ) : paginated.map((req, idx) => (
-                  <tr key={req.aid_id}>
-                    <td className="px-6 py-4">{(page - 1) * rowsPerPage + idx + 1}</td>
-                    <td className="px-6 py-4 font-semibold text-blue-700">{req.full_name}</td>
-                    <td className="px-6 py-4">{req.type_support || req.request_type}</td>
-                    <td className="px-6 py-4">{req.district}</td>
-                    <td className="px-6 py-4">{req.divisional_secretariat}</td>
-                    <td className="px-6 py-4">{req.gn_officer || "N/A"}</td>
-                    <td className="px-6 py-4">{req.gn_contact_no || "N/A"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+    <div className="w-full overflow-x-auto">
+      <table className="min-w-[900px] w-full divide-y divide-gray-200 rounded-xl overflow-hidden shadow">
+        <thead className="bg-gradient-to-r from-blue-600 to-purple-600">
+          <tr>
+            {["#", "Recipient Name", "Request Type", "District", "Divisional Secretariat", "Contact No"].map(header => (
+              <th key={header} className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                {header}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-100">
+          {paginated.length === 0 ? (
+            <tr><td colSpan={6} className="px-6 py-8 text-center text-gray-400">No aid requests found.</td></tr>
+          ) : paginated.map((req, idx) => (
+            <tr key={req.aid_id}>
+              <td className="px-6 py-4">{(page - 1) * rowsPerPage + idx + 1}</td>
+              <td className="px-6 py-4 font-semibold text-blue-700">{req.full_name}</td>
+              <td className="px-6 py-4">{req.type_support || req.request_type}</td>
+              <td className="px-6 py-4">{req.district}</td>
+              <td className="px-6 py-4">{req.divisional_secretariat}</td>
+              <td className="px-6 py-4">{req.contact_no || "N/A"}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
 
-          <div className="px-6 py-4 bg-gray-50 border-t">
-            <div className="flex justify-center space-x-1">
-              {Array.from({ length: Math.ceil(filtered.length / rowsPerPage) }, (_, i) => (
-                <button
-                  key={i}
-                  className={`px-4 py-2 border text-sm rounded-md ${page === i + 1 ? "bg-blue-600 text-white" : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"}`}
-                  onClick={() => setPage(i + 1)}
-                >
-                  {i + 1}
-                </button>
-              ))}
-            </div>
+    <div className="px-6 py-4 bg-gray-50 border-t">
+      <div className="flex justify-center space-x-1">
+        {Array.from({ length: Math.ceil(filtered.length / rowsPerPage) }, (_, i) => (
+          <button
+            key={i}
+            className={`px-4 py-2 border text-sm rounded-md ${page === i + 1 ? "bg-blue-600 text-white" : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"}`}
+            onClick={() => setPage(i + 1)}
+          >
+            {i + 1}
+          </button>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+
+     {/* Features Section with Modern Cards */}
+      <section className="py-20 bg-gradient-to-br from-blue-50 to-purple-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Key Features</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Comprehensive tools and features to help communities prepare, respond, and recover from disasters
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                title: 'Real-time Alerts',
+                desc: 'Instant notifications about disasters and emergencies in your area',
+                img: 'realtimealerts.jpg',
+              },
+              {
+                title: 'Aid Coordination',
+                desc: 'Efficient distribution of resources and support to affected areas',
+                img: 'aid.jpg',
+              },
+              {
+                title: 'Community Support',
+                desc: 'Connect with volunteers and resources in your local community',
+                img: 'volunteer.jpg',
+              },
+            ].map((feature, idx) => (
+              <div 
+                key={feature.title}
+                className="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                style={{ animationDelay: `${idx * 100}ms` }}
+              >
+                <img
+                  src={feature.img}
+                  alt={feature.title}
+                  className="w-full h-40 object-cover rounded-xl mb-6 shadow"
+                />
+                <div className="mb-6 transform group-hover:scale-110 transition-transform duration-300">
+                  {/* Optionally keep the icon for extra visual, or remove if not needed */}
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
+                <p className="text-gray-600">{feature.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      <footer className="text-center py-6 bg-blue-600 text-white mt-24">
-        &copy; 2025 Disaster Tracking & Management System. All rights reserved.
+      {/* Simple Footer with All Rights Reserved */}
+      <footer className="bg-white border-t mt-8">
+        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+          <p className="text-center text-gray-500">© 2025 HazardX Team. All rights reserved.</p>
+        </div>
       </footer>
     </div>
   );

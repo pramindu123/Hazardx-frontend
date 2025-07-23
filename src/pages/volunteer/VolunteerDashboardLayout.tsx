@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
-import { API_BASE_URL } from "../../config/api";
 
 export default function VolunteerDashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -34,7 +33,7 @@ export default function VolunteerDashboardLayout() {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/Volunteer/update-availability?userId=${volunteer.userId}&newStatus=${newStatus}`,
+        `http://localhost:5158/Volunteer/update-availability?userId=${volunteer.userId}&newStatus=${newStatus}`,
         { method: "PUT" }
       );
 
@@ -137,7 +136,6 @@ export default function VolunteerDashboardLayout() {
 
         <hr className="border-gray-200 mb-4" />
         <nav className="flex flex-col gap-3 items-start mt-4 w-full">
-
           <NavLink
             to="/volunteer-dashboard"
             end
@@ -150,11 +148,12 @@ export default function VolunteerDashboardLayout() {
           >
             Dashboard
           </NavLink>
+
           <NavLink
-            to="aid-requests"
+            to="my-contributions"
             className="bg-white py-2 px-6 rounded-full text-left w-full hover:bg-blue-100"
           >
-            Aid Requests
+            My Contributions
           </NavLink>
           <NavLink
             to="add-contribution"
@@ -162,13 +161,6 @@ export default function VolunteerDashboardLayout() {
           >
             Add Contribution
           </NavLink>
-          <NavLink
-            to="my-contributions"
-            className="bg-white py-2 px-6 rounded-full text-left w-full hover:bg-blue-100"
-          >
-            My Contributions
-          </NavLink>
-          
           <NavLink
             to="settings"
             className="bg-white py-2 px-6 rounded-full text-left w-full hover:bg-blue-100"

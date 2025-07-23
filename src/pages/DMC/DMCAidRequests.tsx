@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { API_BASE_URL } from "../../config/api";
 
 export default function DMCAidRequests() {
   const [aidRequests, setAidRequests] = useState<any[]>([]);
@@ -16,7 +15,7 @@ export default function DMCAidRequests() {
       return;
     }
 
-    fetch(`${API_BASE_URL}/AidRequest/byDistrict/${district}`)
+    fetch(`http://localhost:5158/AidRequest/byDistrict/${district}`)
       .then((res) => res.json())
       .then((data) => {
         setAidRequests(data);
@@ -32,7 +31,7 @@ export default function DMCAidRequests() {
     if (!selected) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/AidRequest/updateStatus`, {
+      const response = await fetch("http://localhost:5158/AidRequest/updateStatus", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

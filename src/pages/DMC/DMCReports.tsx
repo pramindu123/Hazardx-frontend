@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { aiVerificationService, type VerificationResult } from "../../services/aiVerificationService";
-import { API_BASE_URL } from "../../config/api";
 
 export default function DMCReports() {
   const [reports, setReports] = useState<any[]>([]);
@@ -31,7 +30,7 @@ export default function DMCReports() {
       console.log("Using district:", district);
 
       if (district) {
-        fetch(`${API_BASE_URL}/Symptoms/pendingReportsByDistrict?district=${encodeURIComponent(district)}`)
+        fetch(`http://localhost:5158/Symptoms/pendingReportsByDistrict?district=${encodeURIComponent(district)}`)
 
           .then((res) => {
             if (!res.ok) {
@@ -153,7 +152,7 @@ export default function DMCReports() {
     };
 
     try {
-      const response = await fetch(`${API_BASE_URL}/Alerts/create`, {
+      const response = await fetch("http://localhost:5158/Alerts/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(alertData),
@@ -164,7 +163,7 @@ export default function DMCReports() {
         return;
       }
 
-      const statusResponse = await fetch(`${API_BASE_URL}/Symptoms/updateStatus`, {
+      const statusResponse = await fetch("http://localhost:5158/Symptoms/updateStatus", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

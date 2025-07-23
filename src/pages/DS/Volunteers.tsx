@@ -7,6 +7,7 @@ interface Volunteer {
   divisional_secretariat: string;
   availability: string;
   email: string;
+  contact_number: string; 
   status: string;
 }
 
@@ -81,6 +82,7 @@ export default function ViewVolunteers() {
               <th className="px-4 py-2 border">User ID</th>
               <th className="px-4 py-2 border">Name</th>
               <th className="px-4 py-2 border">Email</th>
+              <th className="px-4 py-2 border">Contact No</th> 
               <th className="px-4 py-2 border">Availability</th>
             </tr>
           </thead>
@@ -90,6 +92,7 @@ export default function ViewVolunteers() {
                 <td className="px-4 py-2 border">{vol.user_id}</td>
                 <td className="px-4 py-2 border">{vol.name}</td>
                 <td className="px-4 py-2 border">{vol.email}</td>
+                <td className="px-4 py-2 border">{vol.contact_number}</td>
                 <td className="px-4 py-2 border">{vol.availability}</td>
               </tr>
             ))}

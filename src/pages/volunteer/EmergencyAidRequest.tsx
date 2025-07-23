@@ -1,33 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-
+import axios from "axios";
 
 interface AidRequest {
-  aid_request_id: number;
-  contact_number: string;
+  aid_id: number;
+  contact_no: string;
   district: string;
   divisional_secretariat: string;
   date_time: string;
 }
-
-const dummyData: AidRequest[] = [
-  {
-    aid_request_id: 101,
-    contact_number: "0771234567",
-    district: "Colombo",
-    divisional_secretariat: "Colombo DS",
-    date_time: "2025-07-22 10:30"
-  },
-  {
-    aid_request_id: 102,
-    contact_number: "0719876543",
-    district: "Galle",
-    divisional_secretariat: "Galle DS",
-    date_time: "2025-07-22 11:00"
-  }
-];
-
-
 
 interface EmergencyAidRequestProps {
   onBack?: () => void;
@@ -36,9 +16,37 @@ interface EmergencyAidRequestProps {
 
 export default function EmergencyAidRequest({ onBack, onAddContribution }: EmergencyAidRequestProps) {
   const [requests, setRequests] = useState<AidRequest[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
-    setRequests(dummyData);
-    // Replace with API call if needed
+    const fetchEmergencyRequests = async () => {
+      try {
+        setLoading(true);
+
+        // ✅ Get volunteer ID from localStorage
+        const volunteerId = localStorage.getItem("volunteerId");
+        if (!volunteerId) {
+          setError("Volunteer ID not found. Please log in again.");
+          setLoading(false);
+          return;
+        }
+
+        // ✅ Pass it as query param
+        const response = await axios.get<AidRequest[]>(
+          `http://localhost:5158/Volunteer/emergency-support?volunteerId=${volunteerId}`
+        );
+
+        setRequests(response.data);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load emergency aid requests.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEmergencyRequests();
   }, []);
 
   return (
@@ -50,6 +58,10 @@ export default function EmergencyAidRequest({ onBack, onAddContribution }: Emerg
         ← Back
       </button>
       <h2 className="text-2xl font-bold text-center mb-6">Emergency Aid Requests</h2>
+
+      {loading && <p>Loading...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+
       <table className="w-full border-collapse">
         <thead>
           <tr className="bg-blue-100">
@@ -62,10 +74,10 @@ export default function EmergencyAidRequest({ onBack, onAddContribution }: Emerg
           </tr>
         </thead>
         <tbody>
-          {requests.map(req => (
-            <tr key={req.aid_request_id} className="hover:bg-blue-50">
-              <td className="py-2 px-4 border">{req.aid_request_id}</td>
-              <td className="py-2 px-4 border">{req.contact_number}</td>
+          {requests.map((req) => (
+            <tr key={req.aid_id} className="hover:bg-blue-50">
+              <td className="py-2 px-4 border">{req.aid_id}</td>
+              <td className="py-2 px-4 border">{req.contact_no}</td>
               <td className="py-2 px-4 border">{req.district}</td>
               <td className="py-2 px-4 border">{req.divisional_secretariat}</td>
               <td className="py-2 px-4 border">{req.date_time}</td>
@@ -81,6 +93,13 @@ export default function EmergencyAidRequest({ onBack, onAddContribution }: Emerg
               </td>
             </tr>
           ))}
+          {requests.length === 0 && !loading && !error && (
+            <tr>
+              <td colSpan={6} className="py-4 text-center text-gray-500">
+                No emergency aid requests available.
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>

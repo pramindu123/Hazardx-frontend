@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { API_BASE_URL } from "../../config/api";
 
 interface Volunteer {
   userId: number;
@@ -7,6 +6,7 @@ interface Volunteer {
   divisional_secretariat: string;
   district: string;
   email: string;
+  contact_number: string; 
   availability: string; // "Available" | "Unavailable"
 }
 
@@ -31,7 +31,7 @@ export default function DMCVolunteers() {
       return;
     }
 
-    fetch(`${API_BASE_URL}/Volunteer/by-district?district=${district}`)
+    fetch(`http://localhost:5158/Volunteer/by-district?district=${district}`)
       .then((res) => res.json())
       .then((data) => {
         const volunteersWithAvailability = data.map((vol: any) => ({
@@ -72,6 +72,7 @@ export default function DMCVolunteers() {
                 <th className="py-2 px-4 border">Divisional Secretariat</th>
                 <th className="py-2 px-4 border">District</th>
                 <th className="py-2 px-4 border">Email</th>
+                <th className="px-4 py-2 border">Contact No</th> 
                 <th className="py-2 px-4 border">Availability</th>
               </tr>
             </thead>
@@ -82,6 +83,7 @@ export default function DMCVolunteers() {
                   <td className="py-2 px-4 border">{vol.divisional_secretariat}</td>
                   <td className="py-2 px-4 border">{vol.district}</td>
                   <td className="py-2 px-4 border">{vol.email || "N/A"}</td>
+                  <td className="px-4 py-2 border">{vol.contact_number || "N/A"}</td>
                   <td className="py-2 px-4 border">{vol.availability}</td>
                 </tr>
               ))}

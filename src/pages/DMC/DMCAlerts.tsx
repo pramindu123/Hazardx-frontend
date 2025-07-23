@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { API_BASE_URL } from "../../config/api";
 
 export default function DMCAlerts() {
   const [alerts, setAlerts] = useState<any[]>([]);
@@ -15,7 +14,7 @@ export default function DMCAlerts() {
       return;
     }
 
-    fetch(`${API_BASE_URL}/Alerts/byDistrict/${district}`)
+    fetch(`http://localhost:5158/Alerts/byDistrict/${district}`)
       .then((res) => res.json())
       .then((data) => {
         setAlerts(data);
